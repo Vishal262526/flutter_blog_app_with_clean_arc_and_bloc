@@ -2,6 +2,7 @@ import 'package:blog_app/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:blog_app/core/theme/app_theme.dart';
 import 'package:blog_app/features/auth/presentation/bloc/bloc/auth_bloc.dart';
 import 'package:blog_app/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:blog_app/features/blog/presentation/bloc/blog_bloc.dart';
 import 'package:blog_app/features/blog/presentation/pages/blog_page.dart';
 import 'package:blog_app/init_dependencies.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,9 @@ void main() async {
       ),
       BlocProvider(
         create: (context) => sl<AuthBloc>()..add(AuthIsUserLoggedIn()),
+      ),
+      BlocProvider(
+        create: (context) => sl<BlogBloc>(),
       ),
     ],
     child: const MyApp(),

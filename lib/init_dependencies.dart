@@ -8,6 +8,12 @@ import 'package:blog_app/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:blog_app/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:blog_app/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:blog_app/features/auth/presentation/bloc/bloc/auth_bloc.dart';
+import 'package:blog_app/features/blog/data/datasources/blog_remote_data_source.dart';
+import 'package:blog_app/features/blog/data/repositories/blog_repository_impl.dart';
+import 'package:blog_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:blog_app/features/blog/domain/usecases/get_all_blogs.dart';
+import 'package:blog_app/features/blog/domain/usecases/upload_blog.dart';
+import 'package:blog_app/features/blog/presentation/bloc/blog_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,6 +21,7 @@ final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
   _initAuth();
+  _initBlog();
   final supbase = await Supabase.initialize(
     url: AppSecrets.supbaseUrl,
     anonKey: AppSecrets.supbaseAnonKey,
@@ -52,6 +59,29 @@ void _initAuth() async {
         currentUser: sl(),
         appUserCubit: sl(),
         userSignOut: sl(),
+      ),
+    );
+}
+
+void _initBlog() async {
+  // Remote Data Source
+  sl
+    ..registerFactory<BlogRemoteDataSource>(
+        () => BlogRemoteDataSourceImpl(supabaseClient: sl()))
+
+    // Repository
+    ..registerFactory<BlogRepository>(
+        () => BlogRepositoryImpl(blogRemoteDataSource: sl()))
+
+    // Usecase
+    ..registerFactory(() => UploadBlog(blogRepository: sl()))
+    ..registerFactory(() => GetAllBlogs(blogRepository: sl()))
+
+    // Bloc
+    ..registerLazySingleton(
+      () => BlogBloc(
+        uploadBlog: sl(),
+        getAllBlogs: sl(),
       ),
     );
 }
